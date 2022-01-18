@@ -453,6 +453,7 @@ pub fn new_full(mut config: Configuration, cli: &Cli) -> Result<TaskManager, Ser
 	// Spawn Frontier FeeHistory cache maintenance task.
 	task_manager.spawn_essential_handle().spawn(
 		"frontier-fee-history",
+		Some("frontier"),
 		EthTask::fee_history_task(
 			Arc::clone(&client),
 			Arc::clone(&overrides),
