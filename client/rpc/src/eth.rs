@@ -65,7 +65,7 @@ pub struct EthApi<B: BlockT, C, P, CT, BE, H: ExHashT, A: ChainApi, F: Formatter
 	pool: Arc<P>,
 	graph: Arc<Pool<A>>,
 	client: Arc<C>,
-	convert_transaction: CT,
+	convert_transaction: Option<CT>,
 	network: Arc<NetworkService<B, H>>,
 	is_authority: bool,
 	signers: Vec<Box<dyn EthSigner>>,
@@ -89,7 +89,7 @@ where
 		client: Arc<C>,
 		pool: Arc<P>,
 		graph: Arc<Pool<A>>,
-		convert_transaction: CT,
+		convert_transaction: Option<CT>,
 		network: Arc<NetworkService<B, H>>,
 		signers: Vec<Box<dyn EthSigner>>,
 		overrides: Arc<OverrideHandle<B>>,
@@ -844,8 +844,10 @@ where
 				Ok(xt) => xt,
 				_ => return Box::pin(future::err(internal_err("cannot access runtime api")))
 			}
+		} else if self.convert_transaction.is_some() {
+			self.convert_transaction.as_ref().unwrap().convert_transaction(transaction)
 		} else {
-			self.convert_transaction.convert_transaction(transaction)
+			return Box::pin(future::err(internal_err("no transaction converter Api available")))
 		};
 		
 		Box::pin(
@@ -884,8 +886,10 @@ where
 				Ok(xt) => xt,
 				_ => return Box::pin(future::err(internal_err("cannot access runtime api")))
 			}
+		} else if self.convert_transaction.is_some() {
+			self.convert_transaction.as_ref().unwrap().convert_transaction(transaction)
 		} else {
-			self.convert_transaction.convert_transaction(transaction)
+			return Box::pin(future::err(internal_err("no transaction converter Api available")))
 		};
 	
 		Box::pin(

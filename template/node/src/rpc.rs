@@ -138,7 +138,7 @@ where
 		client.clone(),
 		pool.clone(),
 		graph,
-		frontier_template_runtime::TransactionConverter,
+		Some(frontier_template_runtime::TransactionConverter),
 		network.clone(),
 		signers,
 		overrides.clone(),
