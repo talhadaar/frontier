@@ -828,13 +828,32 @@ where
 		let transaction_hash =
 			H256::from_slice(Keccak256::digest(&rlp::encode(&transaction)).as_slice());
 		let hash = self.client.info().best_hash;
+
+		let id = BlockId::hash(hash);
+		let has_api = match self.client
+			.runtime_api()
+			.has_api::<dyn ConvertTransactionRuntimeApi<B>>(&id) {
+
+			Ok(has_api) => has_api,
+			_ => return Box::pin(future::err(internal_err("cannot access runtime api")))
+			
+		};
+
+		let extrinsic = if has_api {
+			match self.client.runtime_api().convert_transaction(&id, transaction) {
+				Ok(xt) => xt,
+				_ => return Box::pin(future::err(internal_err("cannot access runtime api")))
+			}
+		} else {
+			self.convert_transaction.convert_transaction(transaction)
+		};
+		
 		Box::pin(
 			self.pool
 				.submit_one(
 					&BlockId::hash(hash),
 					TransactionSource::Local,
-					self.convert_transaction
-						.convert_transaction(transaction.clone()),
+					extrinsic,
 				)
 				.map_ok(move |_| transaction_hash)
 				.map_err(|err| internal_err(F::pool_error(err))),
