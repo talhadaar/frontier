@@ -30,7 +30,7 @@ use fc_rpc_core::{
 	},
 	EthApi as EthApiT, EthFilterApi as EthFilterApiT, NetApi as NetApiT, Web3Api as Web3ApiT,
 };
-use fp_rpc::{ConvertTransaction, EthereumRuntimeRPCApi, TransactionStatus};
+use fp_rpc::{ConvertTransaction, ConvertTransactionRuntimeApi, EthereumRuntimeRPCApi, TransactionStatus};
 use futures::{future::TryFutureExt, StreamExt};
 use jsonrpc_core::{futures::future, BoxFuture, Result};
 use lru::LruCache;
@@ -48,6 +48,7 @@ use sp_runtime::{
 	traits::{BlakeTwo256, Block as BlockT, NumberFor, One, Saturating, UniqueSaturatedInto, Zero},
 	transaction_validity::TransactionSource,
 };
+use sp_api::ApiExt;
 use std::{
 	collections::BTreeMap,
 	marker::PhantomData,
@@ -64,7 +65,7 @@ pub struct EthApi<B: BlockT, C, P, CT, BE, H: ExHashT, A: ChainApi, F: Formatter
 	pool: Arc<P>,
 	graph: Arc<Pool<A>>,
 	client: Arc<C>,
-	convert_transaction: CT,
+	convert_transaction: Option<CT>,
 	network: Arc<NetworkService<B, H>>,
 	is_authority: bool,
 	signers: Vec<Box<dyn EthSigner>>,
@@ -78,7 +79,7 @@ pub struct EthApi<B: BlockT, C, P, CT, BE, H: ExHashT, A: ChainApi, F: Formatter
 impl<B: BlockT, C, P, CT, BE, H: ExHashT, A: ChainApi, F> EthApi<B, C, P, CT, BE, H, A, F>
 where
 	C: ProvideRuntimeApi<B>,
-	C::Api: EthereumRuntimeRPCApi<B>,
+	C::Api: EthereumRuntimeRPCApi<B> + ConvertTransactionRuntimeApi<B> + sp_api::ApiExt<B>,
 	B: BlockT<Hash = H256> + Send + Sync + 'static,
 	A: ChainApi<Block = B> + 'static,
 	C: Send + Sync + 'static,
@@ -88,7 +89,7 @@ where
 		client: Arc<C>,
 		pool: Arc<P>,
 		graph: Arc<Pool<A>>,
-		convert_transaction: CT,
+		convert_transaction: Option<CT>,
 		network: Arc<NetworkService<B, H>>,
 		signers: Vec<Box<dyn EthSigner>>,
 		overrides: Arc<OverrideHandle<B>>,
@@ -427,7 +428,7 @@ impl<B, C, P, CT, BE, H: ExHashT, A, F> EthApiT for EthApi<B, C, P, CT, BE, H, A
 where
 	C: ProvideRuntimeApi<B> + StorageProvider<B, BE>,
 	C: HeaderBackend<B> + HeaderMetadata<B, Error = BlockChainError> + 'static,
-	C::Api: EthereumRuntimeRPCApi<B>,
+	C::Api: EthereumRuntimeRPCApi<B> + ConvertTransactionRuntimeApi<B> + sp_api::ApiExt<B>,
 	BE: Backend<B> + 'static,
 	BE::State: StateBackend<BlakeTwo256>,
 	B: BlockT<Hash = H256> + Send + Sync + 'static,
@@ -827,13 +828,34 @@ where
 		let transaction_hash =
 			H256::from_slice(Keccak256::digest(&rlp::encode(&transaction)).as_slice());
 		let hash = self.client.info().best_hash;
+
+		let id = BlockId::hash(hash);
+		let has_api = match self.client
+			.runtime_api()
+			.has_api::<dyn ConvertTransactionRuntimeApi<B>>(&id) {
+
+			Ok(has_api) => has_api,
+			_ => return Box::pin(future::err(internal_err("cannot access runtime api")))
+			
+		};
+
+		let extrinsic = if has_api {
+			match self.client.runtime_api().convert_transaction(&id, transaction) {
+				Ok(xt) => xt,
+				_ => return Box::pin(future::err(internal_err("cannot access runtime api")))
+			}
+		} else if self.convert_transaction.is_some() {
+			self.convert_transaction.as_ref().unwrap().convert_transaction(transaction)
+		} else {
+			return Box::pin(future::err(internal_err("no transaction converter Api available")))
+		};
+		
 		Box::pin(
 			self.pool
 				.submit_one(
 					&BlockId::hash(hash),
 					TransactionSource::Local,
-					self.convert_transaction
-						.convert_transaction(transaction.clone()),
+					extrinsic,
 				)
 				.map_ok(move |_| transaction_hash)
 				.map_err(|err| internal_err(F::pool_error(err))),
@@ -848,13 +870,34 @@ where
 		let transaction_hash =
 			H256::from_slice(Keccak256::digest(&rlp::encode(&transaction)).as_slice());
 		let hash = self.client.info().best_hash;
+
+		let id = BlockId::hash(hash);
+		let has_api = match self.client
+			.runtime_api()
+			.has_api::<dyn ConvertTransactionRuntimeApi<B>>(&id) {
+
+			Ok(has_api) => has_api,
+			_ => return Box::pin(future::err(internal_err("cannot access runtime api")))
+			
+		};
+
+		let extrinsic = if has_api {
+			match self.client.runtime_api().convert_transaction(&id, transaction) {
+				Ok(xt) => xt,
+				_ => return Box::pin(future::err(internal_err("cannot access runtime api")))
+			}
+		} else if self.convert_transaction.is_some() {
+			self.convert_transaction.as_ref().unwrap().convert_transaction(transaction)
+		} else {
+			return Box::pin(future::err(internal_err("no transaction converter Api available")))
+		};
+	
 		Box::pin(
 			self.pool
 				.submit_one(
-					&BlockId::hash(hash),
+					&id,
 					TransactionSource::Local,
-					self.convert_transaction
-						.convert_transaction(transaction.clone()),
+					extrinsic,
 				)
 				.map_ok(move |_| transaction_hash)
 				.map_err(|err| internal_err(F::pool_error(err))),

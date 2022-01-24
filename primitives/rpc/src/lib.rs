@@ -102,6 +102,10 @@ sp_api::decl_runtime_apis! {
 			xts: Vec<<Block as BlockT>::Extrinsic>,
 		) -> Vec<ethereum::TransactionV0>;
 	}
+
+	pub trait ConvertTransactionRuntimeApi {
+		fn convert_transaction(transaction: ethereum::TransactionV0) -> <Block as BlockT>::Extrinsic;
+	}
 }
 
 pub trait ConvertTransaction<E> {
