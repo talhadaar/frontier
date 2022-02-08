@@ -49,7 +49,7 @@ use sp_std::{marker::PhantomData, prelude::*};
 
 pub use ethereum::{
 	AccessListItem, BlockV2 as Block, LegacyTransactionMessage, Log, ReceiptV3 as Receipt,
-	TransactionAction, TransactionV2 as Transaction, TransactionV0 as LegacyTransaction
+	TransactionAction, TransactionV0 as LegacyTransaction, TransactionV2 as Transaction,
 };
 pub use fp_rpc::TransactionStatus;
 
@@ -57,6 +57,8 @@ pub use fp_rpc::TransactionStatus;
 mod mock;
 #[cfg(all(feature = "std", test))]
 mod tests;
+
+pub mod migrations;
 
 #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug, scale_info::TypeInfo)]
 pub enum RawOrigin {
