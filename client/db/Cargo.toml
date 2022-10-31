@@ -20,11 +20,11 @@ kvdb-rocksdb = { version = "0.15.2", optional = true }
 parity-db = { version = "0.3.16", optional = true }
 
 # Substrate
-sc-client-db = { version = "0.10.0-dev", git = "https://github.com/purestake/substrate", branch = "moonbeam-polkadot-v0.9.29" }
-sp-blockchain = { version = "4.0.0-dev", git = "https://github.com/purestake/substrate", branch = "moonbeam-polkadot-v0.9.29" }
-sp-core = { version = "6.0.0", git = "https://github.com/purestake/substrate", branch = "moonbeam-polkadot-v0.9.29" }
-sp-database = { version = "4.0.0-dev", git = "https://github.com/purestake/substrate", branch = "moonbeam-polkadot-v0.9.29" }
-sp-runtime = { version = "6.0.0", git = "https://github.com/purestake/substrate", branch = "moonbeam-polkadot-v0.9.29" }
+sc-client-db = { version = "0.10.0-dev", git = "https://github.com/peaqnetwork/substrate", branch = "peaq-polkadot-v0.9.29" }
+sp-blockchain = { version = "4.0.0-dev", git = "https://github.com/peaqnetwork/substrate", branch = "peaq-polkadot-v0.9.29" }
+sp-core = { version = "6.0.0", git = "https://github.com/peaqnetwork/substrate", branch = "peaq-polkadot-v0.9.29" }
+sp-database = { version = "4.0.0-dev", git = "https://github.com/peaqnetwork/substrate", branch = "peaq-polkadot-v0.9.29" }
+sp-runtime = { version = "6.0.0", git = "https://github.com/peaqnetwork/substrate", branch = "peaq-polkadot-v0.9.29" }
 
 # Frontier
 fp-storage = { version = "2.0.0-dev", path = "../../primitives/storage" }
@@ -34,8 +34,8 @@ default = ["kvdb-rocksdb", "parity-db"]
 
 [dev-dependencies]
 futures = "0.3.24"
-sc-block-builder = { version = "0.10.0-dev", git = "https://github.com/purestake/substrate", branch = "moonbeam-polkadot-v0.9.29" }
-sc-client-db = { version = "0.10.0-dev", git = "https://github.com/purestake/substrate", branch = "moonbeam-polkadot-v0.9.29", features = ["rocksdb"] }
-sp-consensus = { version = "0.10.0-dev", git = "https://github.com/purestake/substrate", branch = "moonbeam-polkadot-v0.9.29" }
-substrate-test-runtime-client = { version = "2.0.0", git = "https://github.com/purestake/substrate", branch = "moonbeam-polkadot-v0.9.29" }
+sc-block-builder = { version = "0.10.0-dev", git = "https://github.com/peaqnetwork/substrate", branch = "peaq-polkadot-v0.9.29" }
+sc-client-db = { version = "0.10.0-dev", git = "https://github.com/peaqnetwork/substrate", branch = "peaq-polkadot-v0.9.29", features = ["rocksdb"] }
+sp-consensus = { version = "0.10.0-dev", git = "https://github.com/peaqnetwork/substrate", branch = "peaq-polkadot-v0.9.29" }
+substrate-test-runtime-client = { version = "2.0.0", git = "https://github.com/peaqnetwork/substrate", branch = "peaq-polkadot-v0.9.29" }
 tempfile = "3.3.0"

@@ -19,8 +19,8 @@ codec = { package = "parity-scale-codec", version = "3.1", default-features = fa
 scale-info = { version = "2.1", default-features = false, features = ["derive"] }
 
 # Substrate FRAME
-frame-support = { version = "4.0.0-dev", git = "https://github.com/purestake/substrate", default-features = false , branch = "moonbeam-polkadot-v0.9.29" }
-frame-system = { version = "4.0.0-dev", git = "https://github.com/purestake/substrate", default-features = false , branch = "moonbeam-polkadot-v0.9.29" }
+frame-support = { version = "4.0.0-dev", git = "https://github.com/peaqnetwork/substrate", default-features = false , branch = "peaq-polkadot-v0.9.29" }
+frame-system = { version = "4.0.0-dev", git = "https://github.com/peaqnetwork/substrate", default-features = false , branch = "peaq-polkadot-v0.9.29" }
 
 [features]
 default = ["std"]

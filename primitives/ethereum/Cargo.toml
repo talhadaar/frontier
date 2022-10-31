@@ -20,10 +20,10 @@ num_enum = { version = "0.5.4", default-features = false }
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false }
 
 # Substrate
-sp-core = { version = "6.0.0", git = "https://github.com/purestake/substrate", default-features = false , branch = "moonbeam-polkadot-v0.9.29" }
-sp-std = { version = "4.0.0", git = "https://github.com/purestake/substrate", default-features = false , branch = "moonbeam-polkadot-v0.9.29" }
+sp-core = { version = "6.0.0", git = "https://github.com/peaqnetwork/substrate", default-features = false , branch = "peaq-polkadot-v0.9.29" }
+sp-std = { version = "4.0.0", git = "https://github.com/peaqnetwork/substrate", default-features = false , branch = "peaq-polkadot-v0.9.29" }
 # Substrate FRAME
-frame-support = { version = "4.0.0-dev", git = "https://github.com/purestake/substrate", default-features = false , branch = "moonbeam-polkadot-v0.9.29" }
+frame-support = { version = "4.0.0-dev", git = "https://github.com/peaqnetwork/substrate", default-features = false , branch = "peaq-polkadot-v0.9.29" }
 
 [features]
 default = ["std"]
